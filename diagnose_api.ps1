@@ -39,6 +39,7 @@ foreach ($endpoint in $endpoints) {
             -Method Post `
             -Headers @{ "xi-api-key" = $API_KEY; "Content-Type" = "application/json" } `
             -Body $payload `
+            -UseBasicParsing `
             -ErrorAction Stop
 
         Write-Host "✅ SUCCESS (200)" -ForegroundColor Green
@@ -73,6 +74,7 @@ try {
     $response = Invoke-WebRequest -Uri "$BASE_URL/v1/user" `
         -Method Get `
         -Headers @{ "xi-api-key" = $API_KEY } `
+        -UseBasicParsing `
         -ErrorAction Stop
 
     Write-Host "✅ SUCCESS" -ForegroundColor Green
