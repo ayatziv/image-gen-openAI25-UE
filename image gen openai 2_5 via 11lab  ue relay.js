@@ -47,8 +47,8 @@ app.post("/generate-image", async (req, res) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        prompt,
-        model_id: model_id || "gpt-image-2.5-flare",
+        text: prompt,
+        model: model_id || "gpt-image-2.5-flare",
         aspect_ratio: aspect_ratio || "1:1",
       }),
     });
@@ -105,8 +105,8 @@ app.post("/generate-image-from-reference", async (req, res) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        prompt,
-        model_id: model_id || "gpt-image-2.5-flare",
+        text: prompt,
+        model: model_id || "gpt-image-2.5-flare",
         aspect_ratio: aspect_ratio || "1:1",
         image_data: image_data,
       }),
