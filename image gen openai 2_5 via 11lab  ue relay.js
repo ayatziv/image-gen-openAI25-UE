@@ -170,7 +170,7 @@ app.get("/image-status", async (req, res) => {
     const data = await elevenResponse.json();
     const status = data.status || "unknown";
 
-    if (status === "success" && data.image_url) {
+    if ((status === "success" || status === "completed") && data.image_url) {
       // Fetch the actual image from the URL
       console.log(`[relay] Image ready. Downloading from URL...`);
       const imageResponse = await fetch(data.image_url);
