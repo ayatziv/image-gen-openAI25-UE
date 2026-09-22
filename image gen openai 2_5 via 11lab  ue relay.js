@@ -40,15 +40,15 @@ app.post("/generate-image", async (req, res) => {
   console.log(`[relay] Image generation request: prompt="${prompt.substring(0, 50)}..." model=${model_id || "gpt-image-2.5-flare"} aspect=${aspect_ratio || "1:1"}`);
 
   try {
-    const elevenResponse = await fetch(`${ELEVENLABS_BASE_URL}/v1/flows/image/create`, {
+    const elevenResponse = await fetch(`${ELEVENLABS_BASE_URL}/v1/flows/image`, {
       method: "POST",
       headers: {
         "xi-api-key": API_KEY,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        model_id: model_id || "gpt-image-2.5-flare",
         text: prompt,
-        model: model_id || "gpt-image-2.5-flare",
         aspect_ratio: aspect_ratio || "1:1",
       }),
     });
@@ -98,15 +98,15 @@ app.post("/generate-image-from-reference", async (req, res) => {
   console.log(`[relay] Image generation from reference: prompt="${prompt.substring(0, 50)}..." model=${model_id || "gpt-image-2.5-flare"} aspect=${aspect_ratio || "1:1"} image_size=${image_data.length} bytes`);
 
   try {
-    const elevenResponse = await fetch(`${ELEVENLABS_BASE_URL}/v1/flows/image/create`, {
+    const elevenResponse = await fetch(`${ELEVENLABS_BASE_URL}/v1/flows/image`, {
       method: "POST",
       headers: {
         "xi-api-key": API_KEY,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        model_id: model_id || "gpt-image-2.5-flare",
         text: prompt,
-        model: model_id || "gpt-image-2.5-flare",
         aspect_ratio: aspect_ratio || "1:1",
         image_data: image_data,
       }),
