@@ -40,7 +40,7 @@ app.post("/generate-image", async (req, res) => {
   console.log(`[relay] Image generation request: prompt="${prompt.substring(0, 50)}..." model=${model_id || "gpt-image-2.5-flare"} aspect=${aspect_ratio || "1:1"}`);
 
   try {
-    const elevenResponse = await fetch(`${ELEVENLABS_BASE_URL}/v1/flows/image/create`, {
+    const elevenResponse = await fetch(`${ELEVENLABS_BASE_URL}/v1/image-generation`, {
       method: "POST",
       headers: {
         "xi-api-key": API_KEY,
@@ -98,7 +98,7 @@ app.post("/generate-image-from-reference", async (req, res) => {
   console.log(`[relay] Image generation from reference: prompt="${prompt.substring(0, 50)}..." model=${model_id || "gpt-image-2.5-flare"} aspect=${aspect_ratio || "1:1"} image_size=${image_data.length} bytes`);
 
   try {
-    const elevenResponse = await fetch(`${ELEVENLABS_BASE_URL}/v1/flows/image/create`, {
+    const elevenResponse = await fetch(`${ELEVENLABS_BASE_URL}/v1/image-generation`, {
       method: "POST",
       headers: {
         "xi-api-key": API_KEY,
@@ -154,7 +154,7 @@ app.get("/image-status", async (req, res) => {
   console.log(`[relay] Status check for image_id: ${image_id}`);
 
   try {
-    const elevenResponse = await fetch(`${ELEVENLABS_BASE_URL}/v1/flows/image/${image_id}`, {
+    const elevenResponse = await fetch(`${ELEVENLABS_BASE_URL}/v1/image-generation/${image_id}`, {
       method: "GET",
       headers: {
         "xi-api-key": API_KEY,
