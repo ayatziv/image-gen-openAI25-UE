@@ -127,13 +127,11 @@ echo [PHASE 3] Testing Text-to-Image Endpoint... >> %RESULTS_FILE%
 
 echo [*] Submitting text prompt...
 setlocal enabledelayedexpansion
-(
-  echo {
-  echo   "prompt": "a red cube",
-  echo   "model_id": "gpt-image-2.5-flare",
-  echo   "aspect_ratio": "1:1"
-  echo }
-) > "!TEST_DIR!\text_payload.json"
+echo { > "!TEST_DIR!\text_payload.json"
+echo   "prompt": "a red cube", >> "!TEST_DIR!\text_payload.json"
+echo   "model_id": "gpt-image-2.5-flare", >> "!TEST_DIR!\text_payload.json"
+echo   "aspect_ratio": "1:1" >> "!TEST_DIR!\text_payload.json"
+echo } >> "!TEST_DIR!\text_payload.json"
 
 curl -s -X POST !RELAY_URL!/generate-image -H "Content-Type: application/json" -d @"!TEST_DIR!\text_payload.json" > "!TEST_DIR!\response.json"
 for /f "tokens=2 delims=:,\"" %%A in ('findstr "image_id" "!TEST_DIR!\response.json"') do set TXT_IMAGE_ID=%%A
@@ -220,13 +218,11 @@ if "%B64_SIZE%" gtr "0" (
 echo [*] Submitting image reference request...
 REM Create temp JSON file with base64
 setlocal enabledelayedexpansion
-(
-echo {
-echo   "prompt": "enhance the image with vibrant colors",
-echo   "model_id": "gpt-image-2.5-flare",
-echo   "aspect_ratio": "16:9",
-echo   "image_data": "data:image/jpeg;base64,
-) > "!TEST_DIR!\payload.json"
+echo { > "!TEST_DIR!\payload.json"
+echo   "prompt": "enhance the image with vibrant colors", >> "!TEST_DIR!\payload.json"
+echo   "model_id": "gpt-image-2.5-flare", >> "!TEST_DIR!\payload.json"
+echo   "aspect_ratio": "16:9", >> "!TEST_DIR!\payload.json"
+echo   "image_data": "data:image/jpeg;base64, >> "!TEST_DIR!\payload.json"
 powershell -Command "Add-Content '!TEST_DIR!\payload.json' (Get-Content '!TEST_DIR!\input_base64.txt')" 2>nul
 echo " >> "!TEST_DIR!\payload.json"
 echo } >> "!TEST_DIR!\payload.json"
