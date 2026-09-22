@@ -43,6 +43,6 @@ echo.
 echo Keep this window open. Close it to stop the relay.
 echo.
 
-node relay.js
+node "image gen openai 2_5 via 11lab  ue relay.js"
 
 pause
