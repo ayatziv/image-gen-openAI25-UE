@@ -84,6 +84,66 @@ app.post("/generate-image", async (req, res) => {
   }
 });
 
+app.post("/generate-image-from-reference", async (req, res) => {
+  const { prompt, model_id, aspect_ratio, image_data } = req.body || {};
+
+  if (!prompt) {
+    return res.status(400).json({ error: "Missing prompt in request body." });
+  }
+
+  if (!image_data) {
+    return res.status(400).json({ error: "Missing image_data (base64 encoded image) in request body." });
+  }
+
+  console.log(`[relay] Image generation from reference: prompt="${prompt.substring(0, 50)}..." model=${model_id || "gpt-image-2.5-flare"} aspect=${aspect_ratio || "1:1"} image_size=${image_data.length} bytes`);
+
+  try {
+    const elevenResponse = await fetch(`${ELEVENLABS_BASE_URL}/v1/image/generate`, {
+      method: "POST",
+      headers: {
+        "xi-api-key": API_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prompt,
+        model_id: model_id || "gpt-image-2.5-flare",
+        aspect_ratio: aspect_ratio || "1:1",
+        image_data: image_data,
+      }),
+    });
+
+    if (!elevenResponse.ok) {
+      const errorText = await elevenResponse.text();
+      console.error(`[relay] 11 Labs error ${elevenResponse.status}:`, errorText);
+      return res.status(elevenResponse.status).json({ error: errorText });
+    }
+
+    const data = await elevenResponse.json();
+    const imageId = data.id || data.image_id;
+
+    if (!imageId) {
+      console.error("[relay] No image ID in 11 Labs response:", data);
+      return res.status(500).json({ error: "Invalid response from 11 Labs - no image ID" });
+    }
+
+    // Store job metadata
+    jobStore.set(imageId, {
+      prompt,
+      model_id: model_id || "gpt-image-2.5-flare",
+      status: "submitted",
+      hasReference: true,
+      createdAt: Date.now(),
+    });
+
+    console.log(`[relay] Image job from reference submitted. ID: ${imageId}`);
+
+    res.json({ image_id: imageId, status: "submitted" });
+  } catch (err) {
+    console.error("[relay] Image reference request failed:", err);
+    res.status(500).json({ error: String(err) });
+  }
+});
+
 app.get("/image-status", async (req, res) => {
   const { image_id } = req.query;
 
