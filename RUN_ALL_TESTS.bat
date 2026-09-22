@@ -63,14 +63,14 @@ REM Check if test image exists
 echo [*] Checking test image...
 if not exist "%TEST_DIR%\input.jpg" (
     echo ERROR: Test image not found at %TEST_DIR%\input.jpg
-    echo FAIL: Test image missing >> %RESULTS_FILE%
+    echo FAIL: Test image missing >> "%RESULTS_FILE%"
     goto ERROR
 )
 set /a IMAGE_SIZE=0
 for %%A in ("%TEST_DIR%\input.jpg") do set /a IMAGE_SIZE=%%~zA
 set /a IMAGE_SIZE_KB=IMAGE_SIZE/1024
 echo OK: Test image found ^(%IMAGE_SIZE_KB% KB^)
-echo PASS: Test image found ^(%IMAGE_SIZE_KB% KB^ >> %RESULTS_FILE%
+echo PASS: Test image found ^(%IMAGE_SIZE_KB% KB^ >> "%RESULTS_FILE%"
 
 echo.
 echo ========================================
@@ -132,10 +132,10 @@ echo [*] Submitting text prompt...
   echo   "model_id": "gpt-image-2.5-flare",
   echo   "aspect_ratio": "1:1"
   echo }
-) > %TEST_DIR%\text_payload.json
+) > "%TEST_DIR%\text_payload.json"
 
 setlocal enabledelayedexpansion
-for /f "tokens=2 delims=:,\"" %%A in ('curl -s -X POST %RELAY_URL%/generate-image -H "Content-Type: application/json" -d @%TEST_DIR%\text_payload.json ^| findstr "image_id"') do set TXT_IMAGE_ID=%%A
+for /f "tokens=2 delims=:,\"" %%A in ('curl -s -X POST %RELAY_URL%/generate-image -H "Content-Type: application/json" -d "@%TEST_DIR%\text_payload.json" ^| findstr "image_id"') do set TXT_IMAGE_ID=%%A
 
 if not "!TXT_IMAGE_ID!"=="" (
     echo OK: Image submitted, ID: !TXT_IMAGE_ID!
@@ -197,7 +197,7 @@ echo [PHASE 4] Testing Image Reference Endpoint... >> %RESULTS_FILE%
 echo [*] Reading image file...
 if not exist "%TEST_DIR%\input_base64.txt" (
     echo [*] Converting image to base64...
-    powershell -Command "$img = [System.IO.File]::ReadAllBytes('%TEST_DIR%\input.jpg'); $b64 = [System.Convert]::ToBase64String($img); $b64 | Out-File '%TEST_DIR%\input_base64.txt'"
+    powershell -Command "$img = [System.IO.File]::ReadAllBytes('%TEST_DIR%\input.jpg'); $b64 = [System.Convert]::ToBase64String($img); $b64 | Out-File '%TEST_DIR%\input_base64.txt' -Encoding UTF8"
 )
 
 echo [*] Loading base64 from file...
@@ -225,15 +225,15 @@ echo   "prompt": "enhance the image with vibrant colors",
 echo   "model_id": "gpt-image-2.5-flare",
 echo   "aspect_ratio": "16:9",
 echo   "image_data": "data:image/jpeg;base64,
-) > %TEST_DIR%\payload.json
+) > "%TEST_DIR%\payload.json"
 setlocal enabledelayedexpansion
 powershell -Command "Add-Content '%TEST_DIR%\payload.json' (Get-Content '%TEST_DIR%\input_base64.txt')" 2>nul
-echo " >> %TEST_DIR%\payload.json
-echo } >> %TEST_DIR%\payload.json
+echo " >> "%TEST_DIR%\payload.json"
+echo } >> "%TEST_DIR%\payload.json"
 
 REM Submit request
 setlocal enabledelayedexpansion
-for /f "tokens=2 delims=:,\"" %%A in ('curl -s -X POST %RELAY_URL%/generate-image-from-reference -H "Content-Type: application/json" -d @%TEST_DIR%\payload.json ^| findstr "image_id"') do set REF_IMAGE_ID=%%A
+for /f "tokens=2 delims=:,\"" %%A in ('curl -s -X POST %RELAY_URL%/generate-image-from-reference -H "Content-Type: application/json" -d "@%TEST_DIR%\payload.json" ^| findstr "image_id"') do set REF_IMAGE_ID=%%A
 
 if not "!REF_IMAGE_ID!"=="" (
     echo OK: Reference image submitted, ID: !REF_IMAGE_ID!
