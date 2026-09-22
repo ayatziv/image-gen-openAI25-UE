@@ -126,17 +126,8 @@ echo [PHASE 3] Testing Text-to-Image Endpoint...
 echo [PHASE 3] Testing Text-to-Image Endpoint... >> %RESULTS_FILE%
 
 echo [*] Submitting text prompt...
-for /f %%A in ('curl -s -X POST %RELAY_URL%/generate-image ^
-  -H "Content-Type: application/json" ^
-  -d "{\"prompt\":\"a red cube\",\"model_id\":\"gpt-image-2.5-flare\",\"aspect_ratio\":\"1:1\"}" ^
-  ^| findstr /o "image_id"') do set IMG_ID=%%A
-
-REM Extract image_id from response
 setlocal enabledelayedexpansion
-for /f "tokens=2 delims=:,\"" %%A in ('curl -s -X POST %RELAY_URL%/generate-image ^
-  -H "Content-Type: application/json" ^
-  -d "{\"prompt\":\"a red cube\",\"model_id\":\"gpt-image-2.5-flare\",\"aspect_ratio\":\"1:1\"}" ^
-  ^| findstr "image_id"') do set TXT_IMAGE_ID=%%A
+for /f "tokens=2 delims=:,\"" %%A in ('curl -s -X POST %RELAY_URL%/generate-image -H "Content-Type: application/json" -d "{\"prompt\":\"a red cube\",\"model_id\":\"gpt-image-2.5-flare\",\"aspect_ratio\":\"1:1\"}" ^| findstr "image_id"') do set TXT_IMAGE_ID=%%A
 
 if not "!TXT_IMAGE_ID!"=="" (
     echo OK: Image submitted, ID: !TXT_IMAGE_ID!
@@ -233,10 +224,8 @@ echo " >> %TEST_DIR%\payload.json
 echo } >> %TEST_DIR%\payload.json
 
 REM Submit request
-for /f "tokens=2 delims=:,\"" %%A in ('curl -s -X POST %RELAY_URL%/generate-image-from-reference ^
-  -H "Content-Type: application/json" ^
-  -d @%TEST_DIR%\payload.json ^
-  ^| findstr "image_id"') do set REF_IMAGE_ID=%%A
+setlocal enabledelayedexpansion
+for /f "tokens=2 delims=:,\"" %%A in ('curl -s -X POST %RELAY_URL%/generate-image-from-reference -H "Content-Type: application/json" -d @%TEST_DIR%\payload.json ^| findstr "image_id"') do set REF_IMAGE_ID=%%A
 
 if not "!REF_IMAGE_ID!"=="" (
     echo OK: Reference image submitted, ID: !REF_IMAGE_ID!
