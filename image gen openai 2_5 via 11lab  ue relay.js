@@ -98,6 +98,15 @@ app.post("/generate-image-from-reference", async (req, res) => {
 
   console.log(`[relay] Image generation from reference: prompt="${prompt.substring(0, 50)}..." model=${model_id || "gpt-image-2.5-flare"} aspect=${aspect_ratio || "1:1"} image_size=${image_data.length} bytes`);
 
+  // Parse "data:image/jpeg;base64,...." into mime_type + raw base64 content
+  let mimeType = "image/jpeg";
+  let contentBase64 = image_data;
+  const dataUrlMatch = image_data.match(/^data:([^;]+);base64,(.*)$/s);
+  if (dataUrlMatch) {
+    mimeType = dataUrlMatch[1];
+    contentBase64 = dataUrlMatch[2];
+  }
+
   try {
     const elevenResponse = await fetch(`${ELEVENLABS_BASE_URL}/v1/flows/image`, {
       method: "POST",
@@ -109,7 +118,13 @@ app.post("/generate-image-from-reference", async (req, res) => {
         model_id: model_id || "gpt-image-2.5-flare",
         prompt: prompt,
         aspect_ratio: aspect_ratio || "1:1",
-        image_data: image_data,
+        images: [
+          {
+            type: "inline_base64",
+            content_base64: contentBase64,
+            mime_type: mimeType,
+          },
+        ],
       }),
     });
 
