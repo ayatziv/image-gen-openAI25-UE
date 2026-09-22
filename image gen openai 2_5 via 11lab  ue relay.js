@@ -12,7 +12,8 @@ require("dotenv").config();
 const express = require("express");
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: "100mb", parameterLimit: 50000 }));
+app.use(express.urlencoded({ limit: "100mb", parameterLimit: 50000, extended: true }));
 
 const API_KEY = process.env.ELEVENLABS_API_KEY;
 const PORT = process.env.IMAGE_PORT || 3001;
@@ -170,10 +171,10 @@ app.get("/image-status", async (req, res) => {
     const data = await elevenResponse.json();
     const status = data.status || "unknown";
 
-    if ((status === "success" || status === "completed") && data.image_url) {
-      // Fetch the actual image from the URL
-      console.log(`[relay] Image ready. Downloading from URL...`);
-      const imageResponse = await fetch(data.image_url);
+    if (status === "completed" && data.content_url) {
+      // Fetch the actual image from the signed content URL
+      console.log(`[relay] Image ready. Downloading from content_url...`);
+      const imageResponse = await fetch(data.content_url);
 
       if (!imageResponse.ok) {
         console.error(`[relay] Failed to fetch image from URL: ${imageResponse.status}`);
@@ -193,14 +194,22 @@ app.get("/image-status", async (req, res) => {
 
       return res.json({
         status: "completed",
-        image: imageBase64,
+        image_data: imageBase64,
+        content_mime_type: data.content_mime_type,
         size_bytes: imageBuffer.byteLength,
       });
-    } else if (status === "pending" || status === "processing") {
+    } else if (status === "pending" || status === "generating" || status === "processing") {
       return res.json({ status: "processing" });
+    } else if (status === "failed") {
+      console.error(`[relay] Generation failed: ${data.failure_reason} - ${data.error_message}`);
+      return res.json({
+        status: "failed",
+        failure_reason: data.failure_reason || "unknown",
+        error: data.error_message || "Generation failed with no details",
+      });
     } else {
-      console.error(`[relay] Unexpected status: ${status}`);
-      return res.json({ status: status, error: data.error || "Unknown error" });
+      console.error(`[relay] Unexpected status: ${status}`, data);
+      return res.json({ status: status, error: data.error_message || data.error || "Unknown status from 11 Labs" });
     }
   } catch (err) {
     console.error("[relay] Status check failed:", err);
