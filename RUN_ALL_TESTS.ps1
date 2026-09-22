@@ -50,7 +50,7 @@ Write-Host ""
 
 # PHASE 2: Start relay (should already be running)
 Write-Host "[PHASE 2] Relay Server..."
-$healthCheck = Invoke-WebRequest -Uri "$RELAY_URL/health" -ErrorAction SilentlyContinue
+$healthCheck = Invoke-WebRequest -Uri "$RELAY_URL/health" -UseBasicParsing -ErrorAction SilentlyContinue
 if ($healthCheck.StatusCode -eq 200) {
     Write-Host "OK: Relay is running"
 } else {
@@ -76,6 +76,7 @@ $response = Invoke-WebRequest -Uri "$RELAY_URL/generate-image" `
     -Method POST `
     -Headers @{ "Content-Type" = "application/json" } `
     -Body $payload `
+    -UseBasicParsing `
     -ErrorAction Stop
 
 $imageId = ($response.Content | ConvertFrom-Json).image_id
@@ -92,7 +93,7 @@ if ($imageId) {
         $attempt++
         Start-Sleep -Seconds 2
 
-        $statusResponse = Invoke-WebRequest -Uri "$RELAY_URL/image-status?image_id=$imageId" -ErrorAction SilentlyContinue
+        $statusResponse = Invoke-WebRequest -Uri "$RELAY_URL/image-status?image_id=$imageId" -UseBasicParsing -ErrorAction SilentlyContinue
         $status = ($statusResponse.Content | ConvertFrom-Json).status
 
         if ($status -eq "completed") {
