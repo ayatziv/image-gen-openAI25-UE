@@ -135,7 +135,8 @@ echo [*] Submitting text prompt...
 ) > "%TEST_DIR%\text_payload.json"
 
 setlocal enabledelayedexpansion
-for /f "tokens=2 delims=:,\"" %%A in ('curl -s -X POST %RELAY_URL%/generate-image -H "Content-Type: application/json" -d "@%TEST_DIR%\text_payload.json" ^| findstr "image_id"') do set TXT_IMAGE_ID=%%A
+curl -s -X POST %RELAY_URL%/generate-image -H "Content-Type: application/json" -d @"%TEST_DIR%\text_payload.json" > "%TEST_DIR%\response.json"
+for /f "tokens=2 delims=:,\"" %%A in ('findstr "image_id" "%TEST_DIR%\response.json"') do set TXT_IMAGE_ID=%%A
 
 if not "!TXT_IMAGE_ID!"=="" (
     echo OK: Image submitted, ID: !TXT_IMAGE_ID!
@@ -233,7 +234,8 @@ echo } >> "%TEST_DIR%\payload.json"
 
 REM Submit request
 setlocal enabledelayedexpansion
-for /f "tokens=2 delims=:,\"" %%A in ('curl -s -X POST %RELAY_URL%/generate-image-from-reference -H "Content-Type: application/json" -d "@%TEST_DIR%\payload.json" ^| findstr "image_id"') do set REF_IMAGE_ID=%%A
+curl -s -X POST %RELAY_URL%/generate-image-from-reference -H "Content-Type: application/json" -d @"%TEST_DIR%\payload.json" > "%TEST_DIR%\ref_response.json"
+for /f "tokens=2 delims=:,\"" %%A in ('findstr "image_id" "%TEST_DIR%\ref_response.json"') do set REF_IMAGE_ID=%%A
 
 if not "!REF_IMAGE_ID!"=="" (
     echo OK: Reference image submitted, ID: !REF_IMAGE_ID!
